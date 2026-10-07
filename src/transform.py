@@ -317,7 +317,72 @@ def construir_indice_rubros(paquetes_rubro):
     #   - Para el rubro con mayor valor:  max(dic, key=dic.get)
     #   - El total del año es la suma de los 4 rubros: sum(dic.values())
     #   - Descartá los valores None antes de sumar.
-    raise NotImplementedError("TODO 8a: implementá construir_indice_rubros()")
+    for paquete in paquetes_rubro:
+        provincia = paquete.get("provincia")
+        
+        # Formato 1: Lista de filas (data + orden_columnas)
+        if "data" in paquete and "orden_columnas" in paquete:
+            columnas_nombres = paquete["orden_columnas"]
+            for fila in paquete["data"]:
+                if not fila:
+                    continue
+                anio = extraer_anio(str(fila[0]))
+                if anio is None:
+                    continue
+                
+                valores = fila[1:]
+                rubros_validos = {}
+                for idx, nombre_col in enumerate(columnas_nombres):
+                    if idx < len(valores) and valores[idx] is not None:
+                        try:
+                            rubros_validos[nombre_col] = float(valores[idx])
+                        except (ValueError, TypeError):
+                            pass
+                
+                if not rubros_validos:
+                    continue
+
+                rubro_principal = max(rubros_validos, key=rubros_validos.get)
+                total_anio = sum(rubros_validos.values())
+                val_primarios = rubros_validos.get("Productos primarios", 0.0)
+
+                pp_part = None
+                if total_anio > 0:
+                    pp_part = round((val_primarios / total_anio) * 100, 2)
+
+                indice[(provincia, anio)] = {
+                    "rubro_principal": rubro_principal,
+                    "pp_participacion_pct": pp_part
+                }
+
+        # Formato 2: Diccionario de columnas
+        else:
+            columnas = paquete.get("columnas", {})
+            for col_key, rubros_dict in columnas.items():
+                anio = extraer_anio(str(col_key))
+                if anio is None or not isinstance(rubros_dict, dict):
+                    continue
+
+                rubros_validos = {
+                    r: float(v) for r, v in rubros_dict.items()
+                    if v is not None
+                }
+
+                if not rubros_validos:
+                    continue
+
+                rubro_principal = max(rubros_validos, key=rubros_validos.get)
+                total_anio = sum(rubros_validos.values())
+                val_primarios = rubros_validos.get("Productos primarios", 0.0)
+
+                pp_part = None
+                if total_anio > 0:
+                    pp_part = round((val_primarios / total_anio) * 100, 2)
+
+                indice[(provincia, anio)] = {
+                    "rubro_principal": rubro_principal,
+                    "pp_participacion_pct": pp_part
+                }
     # ---------------------------------------------------------------------
 
     logging.info("  índice de rubros: %s claves (provincia, año)", len(indice))
@@ -335,7 +400,13 @@ def unir_con_rubros(filas, indice_rubros):
     # TODO 8b -------------------------------------------------------------
     # Para cada fila, buscá indice_rubros.get((provincia, anio)) y asigná
     # 'rubro_principal' y 'pp_participacion_pct'. Si no hay match, None.
-    raise NotImplementedError("TODO 8b: implementá unir_con_rubros()")
+    for fila in filas:
+        clave = (fila["provincia"], fila["anio"])
+        info_rubro = indice_rubros.get(clave, {})
+        fila["rubro_principal"] = info_rubro.get("rubro_principal")
+        fila["pp_participacion_pct"] = info_rubro.get("pp_participacion_pct")
+
+    return filas
     # ---------------------------------------------------------------------
 
 
