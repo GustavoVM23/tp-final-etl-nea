@@ -193,7 +193,35 @@ def construir_resumen(filas, detalle_checks):
     #   - Para provincias únicas y ordenadas: sorted({f["provincia"] for f in filas})
     #   - Para la fecha: datetime.now().strftime("%Y-%m-%d %H:%M")
     #   - Podés agregar más claves si querés (suma puntos en la rúbrica).
-    raise NotImplementedError("TODO 11: implementá construir_resumen()")
+    valores = [f["valor_musd"] for f in filas if f["valor_musd"] is not None]
+    anios = [f["anio"] for f in filas if f["anio"] is not None]
+    provincias = sorted({f["provincia"] for f in filas if f["provincia"] is not None})
+
+    min_val = min(valores) if valores else 0.0
+    max_val = max(valores) if valores else 0.0
+    prom_val = round(sum(valores) / len(valores), 2) if valores else 0.0
+
+    resumen = {
+        "dataset": "Exportaciones Provinciales de Argentina",
+        "fuente": "INDEC - Origen Provincial de las Exportaciones (OPEX)",
+        "unidad": "millones de dólares FOB",
+        "generado": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "filas": len(filas),
+        "columnas": len(COLUMNAS),
+        "periodo": {
+            "desde": min(anios) if anios else None,
+            "hasta": max(anios) if anios else None
+        },
+        "provincias": provincias,
+        "valor_musd": {
+            "minimo": min_val,
+            "maximo": max_val,
+            "promedio": prom_val
+        },
+        "quality_checks": detalle_checks
+    }
+
+    return resumen
     # ---------------------------------------------------------------------
 
 
