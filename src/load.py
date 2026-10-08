@@ -234,7 +234,7 @@ def guardar_resumen(resumen, carpeta=None, nombre=None):
     # TODO 12a ------------------------------------------------------------
     # Muy parecido a guardar_csv(), pero con json.dump().
     carpeta = carpeta or config.DIR_PROCESSED
-    nombre = nombre or config.ARCHIVO_SALIDA_RESUMEN
+    nombre = nombre or config.ARCHIVO_SALIDA_JSON
     os.makedirs(carpeta, exist_ok=True)
     ruta = os.path.join(carpeta, nombre)
 
@@ -256,7 +256,7 @@ def escribir_log_corrida(resumen, carpeta=None, nombre=None):
     """
     # TODO 12b ------------------------------------------------------------
     carpeta = carpeta or config.DIR_PROCESSED
-    nombre = nombre or config.ARCHIVO_LOG_CORRIDAS
+    nombre = nombre or config.ARCHIVO_LOG
     os.makedirs(carpeta, exist_ok=True)
     ruta = os.path.join(carpeta, nombre)
 
